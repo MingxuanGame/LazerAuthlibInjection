@@ -21,12 +21,12 @@ namespace osu.Game.Rulesets.AuthlibInjection.UI;
 public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSettingsSubsection(ruleset)
 {
     private const int delay = 1500;
-
-    private readonly AuthlibRulesetConfig authlibRulesetConfig = new();
     private readonly Ruleset ruleset = ruleset;
 
     // ReSharper disable once InconsistentNaming
     private SettingsTextBox ApiUrl = null!;
+
+    private AuthlibRulesetConfig authlibRulesetConfig = new();
 
     // ReSharper disable once InconsistentNaming
     private SettingsTextBox BeatmapSubmissionServiceUrl = null!;
@@ -66,6 +66,13 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
     private void load(Storage storage)
     {
         filePath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
+        if (File.Exists(filePath))
+        {
+            string json = File.ReadAllText(filePath);
+            authlibRulesetConfig =
+                JsonConvert.DeserializeObject<AuthlibRulesetConfig>(json) ?? new AuthlibRulesetConfig();
+        }
+
         Children =
         [
             ApiUrl = new SettingsTextBox()
