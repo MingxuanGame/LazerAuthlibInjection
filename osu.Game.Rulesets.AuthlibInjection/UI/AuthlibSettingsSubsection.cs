@@ -7,7 +7,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
-using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Threading;
 using osu.Game.Graphics;
@@ -118,32 +117,30 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
         ];
         isInitialLoading = Children.Count;
         ApiUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(ApiUrl), e), true);
+            onCustomApiUrlChanged(ApiUrl, nameof(ApiUrl), e), true);
         WebsiteUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(WebsiteUrl), e), true);
+            onCustomApiUrlChanged(WebsiteUrl, nameof(WebsiteUrl), e), true);
         ClientId.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(ClientId), e), true);
+            onCustomApiUrlChanged(ClientId, nameof(ClientId), e), true);
         ClientSecret.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(ClientSecret), e), true);
+            onCustomApiUrlChanged(ClientSecret, nameof(ClientSecret), e), true);
         SpectatorUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(SpectatorUrl), e), true);
+            onCustomApiUrlChanged(SpectatorUrl, nameof(SpectatorUrl), e), true);
         MultiplayerUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(MultiplayerUrl), e), true);
+            onCustomApiUrlChanged(MultiplayerUrl, nameof(MultiplayerUrl), e), true);
         MetadataUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(MetadataUrl), e), true);
+            onCustomApiUrlChanged(MetadataUrl, nameof(MetadataUrl), e), true);
         BeatmapSubmissionServiceUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(nameof(BeatmapSubmissionServiceUrl), e), true);
+            onCustomApiUrlChanged(BeatmapSubmissionServiceUrl, nameof(BeatmapSubmissionServiceUrl), e), true);
     }
 
-    private void onCustomApiUrlChanged(string from, ValueChangedEvent<string> e)
+    private void onCustomApiUrlChanged(SettingsTextBox input, string from, ValueChangedEvent<string> e)
     {
         if (isInitialLoading > 0)
         {
             --isInitialLoading;
         }
 
-        Logger.Log(from + "from " + e.OldValue + " changed to " + e.NewValue, target: LoggingTarget.Runtime);
-        Logger.Log(isInitialLoading.ToString());
         PropertyInfo props = authlibRulesetConfig.GetType().GetProperty(from);
         if (props != null)
         {
@@ -159,11 +156,19 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
         writeToFile?.Cancel();
         writeToFile = Scheduler.AddDelayed(() =>
         {
+            bool removedSuffix = false;
+            if (from.EndsWith("Url") && e.NewValue.EndsWith("/"))
+            {
+                input.Current.Value = e.NewValue.TrimEnd('/');
+                removedSuffix = true;
+            }
+
             File.WriteAllText(
                 filePath,
                 JsonConvert.SerializeObject(authlibRulesetConfig)
             );
-            Notifications.Post(new ApiChangedNotification());
+            if (!removedSuffix)
+                Notifications.Post(new ApiChangedNotification());
         }, delay);
     }
 
