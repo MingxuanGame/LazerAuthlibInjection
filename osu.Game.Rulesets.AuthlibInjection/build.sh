@@ -20,7 +20,7 @@ dotnet tool restore
 echo "Running ILRepack..."
 # Change the path if needed
 HarmonyPath="$HOME/.nuget/packages/lib.harmony/2.4.1/lib/net8.0/0Harmony.dll"
-"$ILRepackPath" -out:"$output" \
+dotnet tool run ilrepack -out:"$output" \
     "$source" \
     "$HarmonyPath" \
     -lib:./fakelib \
