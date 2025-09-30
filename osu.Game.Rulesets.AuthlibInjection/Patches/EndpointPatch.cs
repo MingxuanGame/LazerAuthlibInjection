@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -11,6 +12,56 @@ namespace osu.Game.Rulesets.AuthlibInjection.Patches;
 [HarmonyPatch(typeof(OsuGameBase), nameof(OsuGameBase.CreateEndpoints))]
 public class EndpointPatch
 {
+    private static void readFromCommandLine(AuthlibRulesetConfig config)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        foreach (string arg in args)
+        {
+            string[] split = arg.Split('=');
+
+            string key = split[0];
+            string val = split.Length > 1 ? split[1] : string.Empty;
+            if (String.IsNullOrEmpty(val))
+            {
+                continue;
+            }
+
+            if (!val.StartsWith("http://") && !val.StartsWith("https://"))
+            {
+                val = $"https://{val}";
+            }
+
+            switch (key)
+            {
+                case "--api-url":
+                case "-devserver": // stable like
+                    config.ApiUrl = val;
+                    break;
+                case "--website-url":
+                    config.WebsiteUrl = val;
+                    break;
+                case "--client-id":
+                    config.ClientId = val;
+                    break;
+                case "--client-secret":
+                    config.ClientSecret = val;
+                    break;
+                case "--spectator-url":
+                    config.SpectatorUrl = val;
+                    break;
+                case "--multiplayer-url":
+                    config.MultiplayerUrl = val;
+                    break;
+                case "--metadata-url":
+                    config.MetadataUrl = val;
+                    break;
+                case "--bss-url":
+                    config.BeatmapSubmissionServiceUrl = val;
+                    break;
+            }
+        }
+    }
+
     static void Postfix(OsuGameBase __instance, ref EndpointConfiguration __result)
     {
         // try get game folder
@@ -34,6 +85,7 @@ public class EndpointPatch
         }
 
         var authlibLocalConfig = JsonConvert.DeserializeObject<AuthlibRulesetConfig>(config);
+        readFromCommandLine(authlibLocalConfig);
 
         if (!string.IsNullOrEmpty(authlibLocalConfig.ApiUrl))
         {

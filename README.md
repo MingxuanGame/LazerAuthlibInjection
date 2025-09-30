@@ -28,6 +28,25 @@ Download the latest release from the [Releases](https://github.com/MingxuanGame/
 Click `Rulesets` in the setting panel and configure `API Url` and `Website Url` to your custom server's API and web
 URLs.
 
+## Pass through settings by command line
+
+You can also pass through the settings by command line arguments:
+
+- `--api-url` / `-devserver`: API Url
+- `--website-url`: Website Url
+- `--client-id`: Client ID
+- `--client-secret`: Client Secret
+- `--spectator-url`: Spectator Url
+- `--multiplayer-url`: Multiplayer Url
+- `--metadata-url`: Metadata Url
+- `--bss-url`: Beatmap Submission Service Url
+
+Example:
+
+```bash
+osu!.exe --api-url=lazer-api.g0v0.top --website-url=lazer.g0v0.top 
+```
+
 ## Disclaimer
 
 This project is not affiliated with or endorsed by the official osu! team. Use it at your own risk.
