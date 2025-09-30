@@ -12,7 +12,7 @@ if [ ! "$ILRepackPath" ]; then
     echo "ILRepack not found at $ILRepackPath. Please install it using 'dotnet tool install -g dotnet-ilrepack'."
     exit 1
 fi
-HarmonyPath="$HOME/.nuget/packages/lib.harmony/2.3.6/lib/net8.0/0Harmony.dll"
+HarmonyPath="$HOME/.nuget/packages/lib.harmony/2.4.1/lib/net8.0/0Harmony.dll"
 "$ILRepackPath" -out:./bin/Release/osu.Game.Rulesets.AuthlibInjection.dll \
     ./bin/Release/osu.Game.Rulesets.AuthlibInjection.dll \
     "$HarmonyPath" \
