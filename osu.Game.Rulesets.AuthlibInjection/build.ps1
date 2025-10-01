@@ -11,7 +11,7 @@ try
     if (Test-Path $source) {
         Remove-Item -Path $source
     }
-    Rename-Item $output "osu.Game.Rulesets.AuthlibInjection.source.dll"
+    Rename-Item $output $source
 
     dotnet tool restore
 

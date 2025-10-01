@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-$buildPath = "./bin/Release"
-$source = "$buildPath/osu.Game.Rulesets.AuthlibInjection.source.dll"
-$output = "$buildPath/osu.Game.Rulesets.AuthlibInjection.dll"
+buildPath="./bin/Release"
+source="$buildPath/osu.Game.Rulesets.AuthlibInjection.source.dll"
+output="$buildPath/osu.Game.Rulesets.AuthlibInjection.dll"
 
 echo "Running dotnet build..."
 dotnet build -c Release -o $buildPath
