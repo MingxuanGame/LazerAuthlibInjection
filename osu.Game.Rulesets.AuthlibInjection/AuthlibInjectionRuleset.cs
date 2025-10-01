@@ -64,7 +64,7 @@ namespace osu.Game.Rulesets.AuthlibInjection
         {
             public InjectorIcon()
             {
-                Size = new Vector2(20);
+                AutoSizeAxes = Axes.Both;
                 InternalChildren =
                 [
                     new SpriteIcon
@@ -75,11 +75,10 @@ namespace osu.Game.Rulesets.AuthlibInjection
                     },
                     new SpriteIcon
                     {
-                        Size = new Vector2(0.6f),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
+                        Scale = new Vector2(0.5f),
                         Icon = FontAwesome.Solid.Hammer,
-                        RelativeSizeAxes = Axes.Both,
                     }
                 ];
             }
