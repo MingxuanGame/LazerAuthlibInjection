@@ -1,7 +1,9 @@
+#nullable enable
 using System;
 using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json;
+using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Configuration;
 using osu.Game.Online;
@@ -12,8 +14,9 @@ namespace osu.Game.Rulesets.AuthlibInjection.Patches;
 [HarmonyPatch(typeof(OsuGameBase), nameof(OsuGameBase.CreateEndpoints))]
 public class EndpointPatch
 {
-    private static void readFromCommandLine(AuthlibRulesetConfig config)
+    private static AuthlibRulesetConfig readFromCommandLine(AuthlibRulesetConfig? config)
     {
+        config ??= new AuthlibRulesetConfig();
         string[] args = Environment.GetCommandLineArgs();
         foreach (string arg in args)
         {
@@ -21,7 +24,7 @@ public class EndpointPatch
 
             string key = split[0];
             string val = split.Length > 1 ? split[1] : string.Empty;
-            if (String.IsNullOrEmpty(val))
+            if (string.IsNullOrEmpty(val))
             {
                 continue;
             }
@@ -60,6 +63,8 @@ public class EndpointPatch
                     break;
             }
         }
+
+        return config;
     }
 
     static void Postfix(OsuGameBase __instance, ref EndpointConfiguration __result)
@@ -84,8 +89,18 @@ public class EndpointPatch
             return;
         }
 
-        var authlibLocalConfig = JsonConvert.DeserializeObject<AuthlibRulesetConfig>(config);
-        readFromCommandLine(authlibLocalConfig);
+        AuthlibRulesetConfig? authlibLocalConfig = null;
+        try
+        {
+            authlibLocalConfig = JsonConvert.DeserializeObject<AuthlibRulesetConfig>(config);
+        }
+        catch (JsonException)
+        {
+            Logger.Log("[AuthlibInjection] Failed to parse authlib_local_config.json, please check the json format.",
+                level: LogLevel.Error);
+        }
+
+        authlibLocalConfig = readFromCommandLine(authlibLocalConfig);
 
         if (!string.IsNullOrEmpty(authlibLocalConfig.ApiUrl))
         {
