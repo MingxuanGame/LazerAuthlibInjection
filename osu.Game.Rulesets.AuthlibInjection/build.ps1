@@ -1,5 +1,6 @@
 $buildPath = "./bin/Release"
-$source = "$buildPath/osu.Game.Rulesets.AuthlibInjection.source.dll"
+$sourceFilename = "osu.Game.Rulesets.AuthlibInjection.source.dll"
+$source = "$buildPath/$sourceFilename"
 $output = "$buildPath/osu.Game.Rulesets.AuthlibInjection.dll"
 
 try
@@ -11,7 +12,7 @@ try
     if (Test-Path $source) {
         Remove-Item -Path $source
     }
-    Rename-Item $output "osu.Game.Rulesets.AuthlibInjection.source.dll"
+    Rename-Item $output $sourceFilename
 
     dotnet tool restore
 
