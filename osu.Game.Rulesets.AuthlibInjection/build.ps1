@@ -11,7 +11,7 @@ try
     if (Test-Path $source) {
         Remove-Item -Path $source
     }
-    Rename-Item $output $source
+    Rename-Item $output "osu.Game.Rulesets.AuthlibInjection.source.dll"
 
     dotnet tool restore
 
@@ -31,5 +31,8 @@ try
 catch
 {
     Write-Output "Build failed"
+    
+    # Must present the exception
+    throw
     exit 1
 }
