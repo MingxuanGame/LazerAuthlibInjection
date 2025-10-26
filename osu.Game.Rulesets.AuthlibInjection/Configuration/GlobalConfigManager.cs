@@ -13,9 +13,17 @@ public class GlobalConfigManager
 {
     private static readonly object @lock = new();
     private static AuthlibRulesetConfig? instance;
+    private static RulesetHashCache? hashCache;
+    private static OsuGameBase? gameBase;
 
-    public static AuthlibRulesetConfig Instance =>
+    public static OsuGameBase GameBase =>
+        gameBase ?? throw new InvalidOperationException("GameBase is not initialized.");
+
+    public static AuthlibRulesetConfig Config =>
         instance ?? throw new InvalidOperationException("AuthlibRulesetConfig is not initialized.");
+
+    public static RulesetHashCache HashCache =>
+        hashCache ?? throw new InvalidOperationException("HashCache is not initialized.");
 
 
     public static bool Patched => instance != null && !string.IsNullOrEmpty(instance.ApiUrl);
@@ -105,19 +113,45 @@ public class GlobalConfigManager
         return null;
     }
 
-    public static void Initialize(OsuGameBase gameBase)
+    public static void InitializeGameBase(OsuGameBase osuGameBase)
     {
-        // try get game folder
-        var localConfig = Traverse.Create(gameBase).Property("LocalConfig").GetValue<OsuConfigManager>();
-        string configPath = AuthlibRulesetConfig.CONFIG_FILE_NAME;
-        if (localConfig != null)
+        lock (@lock)
         {
-            var storage = Traverse.Create(localConfig).Field("storage").GetValue<Storage>();
-            configPath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
+            gameBase ??= osuGameBase;
         }
+    }
 
-        AuthlibRulesetConfig? authlibLocalConfig = readFromFile(configPath);
+    public static void InitializeConfig()
+    {
+        lock (@lock)
+        {
+            // try get game folder
+            var localConfig = Traverse.Create(GameBase).Property("LocalConfig").GetValue<OsuConfigManager>();
+            string configPath = AuthlibRulesetConfig.CONFIG_FILE_NAME;
+            if (localConfig != null)
+            {
+                var storage = Traverse.Create(localConfig).Field("storage").GetValue<Storage>();
+                configPath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
+            }
 
-        instance = readFromCommandLine(authlibLocalConfig);
+            AuthlibRulesetConfig? authlibLocalConfig = readFromFile(configPath);
+
+            instance = readFromCommandLine(authlibLocalConfig);
+        }
+    }
+
+    public static void InitializeHashCache(RulesetStore store)
+    {
+        lock (@lock)
+        {
+            hashCache ??= new RulesetHashCache(store);
+        }
+    }
+
+    public static void InitializeHashCache()
+    {
+        // try get ruleset store
+        var store = Traverse.Create(GameBase).Property("RulesetStore").GetValue<RulesetStore>();
+        InitializeHashCache(store);
     }
 }

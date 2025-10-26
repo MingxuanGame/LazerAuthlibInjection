@@ -8,9 +8,13 @@ namespace osu.Game.Rulesets.AuthlibInjection.Patches;
 [HarmonyPatch(typeof(OsuGameBase), nameof(OsuGameBase.CreateEndpoints))]
 public class EndpointPatch
 {
-    static void Postfix(ref EndpointConfiguration __result)
+    public static void Postfix(OsuGameBase __instance, ref EndpointConfiguration __result)
     {
-        var authlibLocalConfig = GlobalConfigManager.Instance;
+        GlobalConfigManager.InitializeGameBase(__instance);
+        GlobalConfigManager.InitializeConfig();
+        GlobalConfigManager.InitializeHashCache();
+
+        var authlibLocalConfig = GlobalConfigManager.Config;
 
         if (!string.IsNullOrEmpty(authlibLocalConfig.ApiUrl))
         {
