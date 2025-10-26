@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -25,9 +26,13 @@ namespace osu.Game.Rulesets.AuthlibInjection
 
         public AuthlibInjectionRuleset()
         {
+            GlobalConfigManager.Initialize(gameBase);
+            if (!GlobalConfigManager.Patched) return;
             var harmony = new Harmony(short_name);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
+
+        [Resolved] private OsuGameBase gameBase { get; set; }
 
         public override string Description => "Custom server support for osu!lazer";
 
