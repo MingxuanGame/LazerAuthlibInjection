@@ -40,7 +40,14 @@ public class GlobalConfigManager
             string val = split.Length > 1 ? split[1] : string.Empty;
             if (string.IsNullOrEmpty(val))
             {
-                continue;
+                switch (key)
+                {
+                    case "--disable-sentry-logger":
+                        config.DisableSentryLogger = true;
+                        continue;
+                    default:
+                        continue;
+                }
             }
 
             if (!val.StartsWith("http://") && !val.StartsWith("https://"))
