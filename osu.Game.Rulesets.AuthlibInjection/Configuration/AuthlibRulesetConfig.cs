@@ -12,7 +12,8 @@ public class AuthlibRulesetConfig
         string spectatorUrl,
         string multiplayerUrl,
         string metadataUrl,
-        string beatmapSubmissionServiceUrl)
+        string beatmapSubmissionServiceUrl,
+        bool disableSentryLogger)
     {
         ApiUrl = removeSuffix(apiUrl, "/");
         WebsiteUrl = removeSuffix(websiteUrl, "/");
@@ -22,6 +23,7 @@ public class AuthlibRulesetConfig
         MultiplayerUrl = removeSuffix(multiplayerUrl, "/");
         MetadataUrl = removeSuffix(metadataUrl, "/");
         BeatmapSubmissionServiceUrl = removeSuffix(beatmapSubmissionServiceUrl, "/");
+        DisableSentryLogger = disableSentryLogger;
     }
 
     public string ApiUrl { get; set; } = string.Empty;
@@ -32,6 +34,8 @@ public class AuthlibRulesetConfig
     public string MultiplayerUrl { get; set; } = string.Empty;
     public string MetadataUrl { get; set; } = string.Empty;
     public string BeatmapSubmissionServiceUrl { get; set; } = string.Empty;
+
+    public bool DisableSentryLogger { get; set; } = true;
 
     private static string removeSuffix(string text, string suffix)
     {

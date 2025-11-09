@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -10,6 +11,7 @@ using osu.Game.Configuration;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Beatmaps;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
+using osu.Game.Rulesets.AuthlibInjection.Patches;
 using osu.Game.Rulesets.AuthlibInjection.UI;
 using osu.Game.Rulesets.Configuration;
 using osu.Game.Rulesets.Difficulty;
@@ -81,6 +83,13 @@ namespace osu.Game.Rulesets.AuthlibInjection
                         Icon = FontAwesome.Solid.Hammer,
                     }
                 ];
+            }
+
+            [BackgroundDependencyLoader]
+            private void load(OsuGame game)
+            {
+                if (GlobalConfigManager.Config.DisableSentryLogger)
+                    DisableSentryPatch.Run(game);
             }
         }
     }

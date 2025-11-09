@@ -19,6 +19,7 @@ public class AuthlibRulesetConfigManager(SettingsStore store, RulesetInfo rulese
         SetDefault(AuthlibRulesetSettings.MultiplayerUrl, string.Empty);
         SetDefault(AuthlibRulesetSettings.MetadataUrl, string.Empty);
         SetDefault(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl, string.Empty);
+        SetDefault(AuthlibRulesetSettings.DisableSentryLogger, true);
     }
 }
 
@@ -31,5 +32,6 @@ public enum AuthlibRulesetSettings
     SpectatorUrl,
     MultiplayerUrl,
     MetadataUrl,
-    BeatmapSubmissionServiceUrl
+    BeatmapSubmissionServiceUrl,
+    DisableSentryLogger,
 }

@@ -14,6 +14,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
+using osu.Game.Rulesets.AuthlibInjection.Patches;
 
 namespace osu.Game.Rulesets.AuthlibInjection.UI;
 
@@ -21,35 +22,32 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 {
     private const int delay = 1500;
     private readonly Ruleset ruleset = ruleset;
-
-    // ReSharper disable once InconsistentNaming
-    private SettingsTextBox ApiUrl = null!;
-
     private AuthlibRulesetConfig authlibRulesetConfig = new();
 
-    // ReSharper disable once InconsistentNaming
+    // Considered for distinction, batch disabling
+    // ReSharper disable InconsistentNaming
+    private SettingsCheckbox DisableSentryLogging = null!;
+
+    private SettingsTextBox ApiUrl = null!;
+
     private SettingsTextBox BeatmapSubmissionServiceUrl = null!;
 
-    // ReSharper disable once InconsistentNaming
     private SettingsTextBox ClientId = null!;
 
-    // ReSharper disable once InconsistentNaming
     private SettingsTextBox ClientSecret = null!;
+
+    private SettingsTextBox MetadataUrl = null!;
+
+    private SettingsTextBox MultiplayerUrl = null!;
+
+    private SettingsTextBox SpectatorUrl = null!;
+
+    private SettingsTextBox WebsiteUrl = null!;
+    // ReSharper restore InconsistentNaming
 
     private string filePath = "";
     private int isInitialLoading;
 
-    // ReSharper disable once InconsistentNaming
-    private SettingsTextBox MetadataUrl = null!;
-
-    // ReSharper disable once InconsistentNaming
-    private SettingsTextBox MultiplayerUrl = null!;
-
-    // ReSharper disable once InconsistentNaming
-    private SettingsTextBox SpectatorUrl = null!;
-
-    // ReSharper disable once InconsistentNaming
-    private SettingsTextBox WebsiteUrl = null!;
     [CanBeNull] private ScheduledDelegate writeToFile;
 
     private AuthlibRulesetConfigManager config => (AuthlibRulesetConfigManager)Config;
@@ -62,7 +60,7 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 
 
     [BackgroundDependencyLoader]
-    private void load(Storage storage)
+    private void load(OsuGame game, Storage storage)
     {
         filePath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
         if (File.Exists(filePath))
@@ -113,6 +111,12 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
             {
                 LabelText = "Beatmap Submission Service Url",
                 Current = config.GetBindable<string>(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl)
+            },
+            DisableSentryLogging = new SettingsCheckbox()
+            {
+                LabelText = "Disable Sentry Logger",
+                TooltipText = "Stop sending telemetry error data to the osu! dev team.",
+                Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger)
             }
         ];
         isInitialLoading = Children.Count;
@@ -132,6 +136,18 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
             onCustomApiUrlChanged(MetadataUrl, nameof(MetadataUrl), e), true);
         BeatmapSubmissionServiceUrl.Current.BindValueChanged(e =>
             onCustomApiUrlChanged(BeatmapSubmissionServiceUrl, nameof(BeatmapSubmissionServiceUrl), e), true);
+        DisableSentryLogging.Current.BindValueChanged(e => onSentryOptOutChanged(e, game), true);
+    }
+
+    private void onSentryOptOutChanged(ValueChangedEvent<bool> e, OsuGame game)
+    {
+        File.WriteAllText(filePath, JsonConvert.SerializeObject(authlibRulesetConfig));
+
+        // When switching from off to on, try to disable potentially active logger instance.
+        if (e.NewValue)
+        {
+            DisableSentryPatch.Run(game);
+        }
     }
 
     private void onCustomApiUrlChanged(SettingsTextBox input, string from, ValueChangedEvent<string> e)
