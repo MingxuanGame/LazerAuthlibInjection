@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Configuration;
+using osu.Game.Rulesets.AuthlibInjection.Extensions;
 
 namespace osu.Game.Rulesets.AuthlibInjection.Configuration;
 
@@ -50,19 +51,14 @@ public class GlobalConfigManager
                 }
             }
 
-            if (!val.StartsWith("http://") && !val.StartsWith("https://"))
-            {
-                val = $"https://{val}";
-            }
-
             switch (key)
             {
                 case "--api-url":
                 case "-devserver": // stable like
-                    config.ApiUrl = val;
+                    config.ApiUrl = val.AddHttpsProtocol();
                     break;
                 case "--website-url":
-                    config.WebsiteUrl = val;
+                    config.WebsiteUrl = val.AddHttpsProtocol();
                     break;
                 case "--client-id":
                     config.ClientId = val;
@@ -71,16 +67,16 @@ public class GlobalConfigManager
                     config.ClientSecret = val;
                     break;
                 case "--spectator-url":
-                    config.SpectatorUrl = val;
+                    config.SpectatorUrl = val.AddHttpsProtocol();
                     break;
                 case "--multiplayer-url":
-                    config.MultiplayerUrl = val;
+                    config.MultiplayerUrl = val.AddHttpsProtocol();
                     break;
                 case "--metadata-url":
-                    config.MetadataUrl = val;
+                    config.MetadataUrl = val.AddHttpsProtocol();
                     break;
                 case "--bss-url":
-                    config.BeatmapSubmissionServiceUrl = val;
+                    config.BeatmapSubmissionServiceUrl = val.AddHttpsProtocol();
                     break;
             }
         }

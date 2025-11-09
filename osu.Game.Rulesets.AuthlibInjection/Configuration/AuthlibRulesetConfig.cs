@@ -1,3 +1,5 @@
+using osu.Game.Rulesets.AuthlibInjection.Extensions;
+
 namespace osu.Game.Rulesets.AuthlibInjection.Configuration;
 
 public class AuthlibRulesetConfig
@@ -15,14 +17,14 @@ public class AuthlibRulesetConfig
         string beatmapSubmissionServiceUrl,
         bool disableSentryLogger)
     {
-        ApiUrl = removeSuffix(apiUrl, "/");
-        WebsiteUrl = removeSuffix(websiteUrl, "/");
+        ApiUrl = apiUrl.RemoveSuffix("/");
+        WebsiteUrl = websiteUrl.RemoveSuffix("/");
         ClientId = clientId;
         ClientSecret = clientSecret;
-        SpectatorUrl = removeSuffix(spectatorUrl, "/");
-        MultiplayerUrl = removeSuffix(multiplayerUrl, "/");
-        MetadataUrl = removeSuffix(metadataUrl, "/");
-        BeatmapSubmissionServiceUrl = removeSuffix(beatmapSubmissionServiceUrl, "/");
+        SpectatorUrl = spectatorUrl.RemoveSuffix("/");
+        MultiplayerUrl = multiplayerUrl.RemoveSuffix("/");
+        MetadataUrl = metadataUrl.RemoveSuffix("/");
+        BeatmapSubmissionServiceUrl = beatmapSubmissionServiceUrl.RemoveSuffix("/");
         DisableSentryLogger = disableSentryLogger;
     }
 
@@ -36,14 +38,4 @@ public class AuthlibRulesetConfig
     public string BeatmapSubmissionServiceUrl { get; set; } = string.Empty;
 
     public bool DisableSentryLogger { get; set; } = true;
-
-    private static string removeSuffix(string text, string suffix)
-    {
-        if (text.EndsWith(suffix))
-        {
-            return text.Substring(0, text.Length - suffix.Length);
-        }
-
-        return text;
-    }
 }
