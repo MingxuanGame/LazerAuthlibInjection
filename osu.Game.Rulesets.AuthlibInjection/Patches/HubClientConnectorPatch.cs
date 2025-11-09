@@ -21,6 +21,11 @@ public class HubClientConnectorPatch
     static bool Prefix(CancellationToken cancellationToken,
         HubClientConnector __instance, ref Task<PersistentEndpointClient> __result)
     {
+        if (!GlobalConfigManager.Patched)
+        {
+            return true;
+        }
+
         GlobalConfigManager.InitializeHashCache();
 
         // Copy of HubClientConnector.BuildConnectionAsync

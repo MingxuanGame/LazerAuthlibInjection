@@ -12,6 +12,9 @@ namespace osu.Game.Rulesets.AuthlibInjection.Configuration;
 
 public class GlobalConfigManager
 {
+    private const string osu_prod_api_url = "https://osu.ppy.sh";
+    private const string osu_dev_api_url = "https://dev.ppy.sh";
+
     private static readonly object @lock = new();
     private static AuthlibRulesetConfig? instance;
     private static RulesetHashCache? hashCache;
@@ -27,7 +30,8 @@ public class GlobalConfigManager
         hashCache ?? throw new InvalidOperationException("HashCache is not initialized.");
 
 
-    public static bool Patched => instance != null && !string.IsNullOrEmpty(instance.ApiUrl);
+    public static bool Patched => instance != null && !string.IsNullOrEmpty(instance.ApiUrl) &&
+                                  instance.ApiUrl != osu_prod_api_url && instance.ApiUrl != osu_dev_api_url;
 
     private static AuthlibRulesetConfig readFromCommandLine(AuthlibRulesetConfig? config)
     {

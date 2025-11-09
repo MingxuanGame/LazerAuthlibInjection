@@ -1,5 +1,6 @@
 using HarmonyLib;
 using osu.Game.Extensions;
+using osu.Game.Rulesets.AuthlibInjection.Configuration;
 
 namespace osu.Game.Rulesets.AuthlibInjection.Patches;
 
@@ -9,6 +10,11 @@ public class ModelExtensionsPatch
 {
     static bool Prefix(IRulesetInfo ruleset, ref bool __result)
     {
+        if (!GlobalConfigManager.Patched)
+        {
+            return true;
+        }
+
         __result = ruleset.OnlineID >= 0;
         return false;
     }

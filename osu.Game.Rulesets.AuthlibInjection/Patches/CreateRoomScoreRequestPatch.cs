@@ -11,6 +11,11 @@ public class CreateRoomScoreRequestPatch
 {
     static void Postfix(CreateRoomScoreRequest __instance, ref WebRequest __result)
     {
+        if (!GlobalConfigManager.Patched)
+        {
+            return;
+        }
+
         GlobalConfigManager.InitializeHashCache();
 
         int rulesetId = Traverse.Create(__instance).Field("rulesetId").GetValue<int>();
