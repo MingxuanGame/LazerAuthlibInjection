@@ -40,11 +40,12 @@ You can also pass through the settings by command line arguments:
 - `--multiplayer-url`: Multiplayer Url
 - `--metadata-url`: Metadata Url
 - `--bss-url`: Beatmap Submission Service Url
+- `--disable-sentry-logger`: Disable Sentry to osu! team
 
 Example:
 
 ```bash
-osu!.exe --api-url=lazer-api.g0v0.top --website-url=lazer.g0v0.top 
+osu!.exe --api-url=lazer-api.g0v0.top --website-url=lazer.g0v0.top --disable-sentry-logger
 ```
 
 ## Disclaimer
@@ -54,7 +55,7 @@ This project is not affiliated with or endorsed by the official osu! team. Use i
 AuthlibInjection is provided "as is" without warranty of any kind. The author is not responsible for any damage or
 account banning that may occur from using this ruleset.
 
-**DO NOT report any issue about this ruleset to ppy!**
+**DO NOT report any issue about this ruleset to osu! team**
 
 ## License
 
