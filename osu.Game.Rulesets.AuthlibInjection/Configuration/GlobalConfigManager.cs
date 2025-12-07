@@ -29,7 +29,6 @@ public class GlobalConfigManager
     public static RulesetHashCache HashCache =>
         hashCache ?? throw new InvalidOperationException("HashCache is not initialized.");
 
-
     public static bool Patched => instance != null && !string.IsNullOrEmpty(instance.ApiUrl) &&
                                   instance.ApiUrl != osu_prod_api_url && instance.ApiUrl != osu_dev_api_url;
 
@@ -37,12 +36,14 @@ public class GlobalConfigManager
     {
         config ??= new AuthlibRulesetConfig();
         string[] args = Environment.GetCommandLineArgs();
+
         foreach (string arg in args)
         {
             string[] split = arg.Split('=');
 
             string key = split[0];
             string val = split.Length > 1 ? split[1] : string.Empty;
+
             if (string.IsNullOrEmpty(val))
             {
                 switch (key)
@@ -50,6 +51,11 @@ public class GlobalConfigManager
                     case "--disable-sentry-logger":
                         config.DisableSentryLogger = true;
                         continue;
+
+                    case "--non-g0v0-server":
+                        config.NonG0V0Server = true;
+                        continue;
+
                     default:
                         continue;
                 }
@@ -61,24 +67,31 @@ public class GlobalConfigManager
                 case "-devserver": // stable like
                     config.ApiUrl = val.AddHttpsProtocol();
                     break;
+
                 case "--website-url":
                     config.WebsiteUrl = val.AddHttpsProtocol();
                     break;
+
                 case "--client-id":
                     config.ClientId = val;
                     break;
+
                 case "--client-secret":
                     config.ClientSecret = val;
                     break;
+
                 case "--spectator-url":
                     config.SpectatorUrl = val.AddHttpsProtocol();
                     break;
+
                 case "--multiplayer-url":
                     config.MultiplayerUrl = val.AddHttpsProtocol();
                     break;
+
                 case "--metadata-url":
                     config.MetadataUrl = val.AddHttpsProtocol();
                     break;
+
                 case "--bss-url":
                     config.BeatmapSubmissionServiceUrl = val.AddHttpsProtocol();
                     break;
@@ -98,6 +111,7 @@ public class GlobalConfigManager
         }
 
         string config = File.ReadAllText(configPath);
+
         if (string.IsNullOrEmpty(config))
         {
             Logger.Log("[AuthlibInjection] authlib_local_config.json is empty, please check the file.",
@@ -115,7 +129,6 @@ public class GlobalConfigManager
                 "[AuthlibInjection] Failed to parse authlib_local_config.json, please check the json format.",
                 level: LogLevel.Error);
         }
-
 
         return null;
     }
@@ -135,6 +148,7 @@ public class GlobalConfigManager
             // try get game folder
             var localConfig = Traverse.Create(GameBase).Property("LocalConfig").GetValue<OsuConfigManager>();
             string configPath = AuthlibRulesetConfig.CONFIG_FILE_NAME;
+
             if (localConfig != null)
             {
                 var storage = Traverse.Create(localConfig).Field("storage").GetValue<Storage>();

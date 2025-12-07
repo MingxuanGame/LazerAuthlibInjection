@@ -41,6 +41,8 @@ You can also pass through the settings by command line arguments:
 - `--metadata-url`: Metadata Url
 - `--bss-url`: Beatmap Submission Service Url
 - `--disable-sentry-logger`: Disable Sentry to osu! team
+- `--non-g0v0-server`: Disable specific features for [g0v0-server](https://github.com/GooGuTeam/g0v0-server) like Relax
+  functions & submitting custom ruleset scores.
 
 Example:
 

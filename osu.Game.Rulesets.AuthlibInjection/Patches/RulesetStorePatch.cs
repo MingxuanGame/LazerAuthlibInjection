@@ -12,7 +12,7 @@ public class RulesetStorePatch
 {
     static bool Prefix(RulesetStore __instance, string shortName, ref IRulesetInfo __result)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return true;
         }

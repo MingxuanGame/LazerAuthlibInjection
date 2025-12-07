@@ -38,7 +38,7 @@ public class UserStatisticsWatcherPatch
 {
     static bool Prefix(UserStatisticsWatcher __instance, int userId, long scoreId)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return true;
         }

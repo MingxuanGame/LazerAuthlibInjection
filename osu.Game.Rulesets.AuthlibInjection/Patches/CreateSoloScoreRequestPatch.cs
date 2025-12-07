@@ -11,7 +11,7 @@ public class CreateSoloScoreRequestPatch
 {
     static void Postfix(CreateSoloScoreRequest __instance, ref WebRequest __result)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return;
         }
@@ -19,7 +19,8 @@ public class CreateSoloScoreRequestPatch
         GlobalConfigManager.InitializeHashCache();
 
         int rulesetId = Traverse.Create(__instance).Field("rulesetId").GetValue<int>();
-        var rulesetHash = GlobalConfigManager.HashCache.GetHash(rulesetId);
+        string rulesetHash = GlobalConfigManager.HashCache.GetHash(rulesetId);
+
         if (rulesetHash != null)
         {
             __result.AddParameter("ruleset_hash", rulesetHash);

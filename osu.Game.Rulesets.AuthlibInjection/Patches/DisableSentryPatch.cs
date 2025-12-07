@@ -21,7 +21,7 @@ namespace osu.Game.Rulesets.AuthlibInjection.Patches
             try
             {
                 var field = game.GetType().GetFields(instance_flag)
-                    .FirstOrDefault(f => f.FieldType == typeof(SentryLogger));
+                                .FirstOrDefault(f => f.FieldType == typeof(SentryLogger));
 
                 if (field == null)
                 {

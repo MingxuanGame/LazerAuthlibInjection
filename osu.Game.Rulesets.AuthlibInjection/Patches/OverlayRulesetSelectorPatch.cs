@@ -43,7 +43,7 @@ public class OverlayRulesetSelectorPatch
 
     static bool Prefix(RulesetSelector __instance)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return true;
         }
