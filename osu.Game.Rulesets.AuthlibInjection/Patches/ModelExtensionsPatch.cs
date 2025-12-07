@@ -10,7 +10,7 @@ public class ModelExtensionsPatch
 {
     static bool Prefix(IRulesetInfo ruleset, ref bool __result)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return true;
         }

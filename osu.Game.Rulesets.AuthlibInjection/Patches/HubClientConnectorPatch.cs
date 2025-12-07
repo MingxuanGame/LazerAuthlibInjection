@@ -19,9 +19,9 @@ public class HubClientConnectorPatch
     private const string ruleset_hash_header = @"X-Osu-Ruleset-Hashes";
 
     static bool Prefix(CancellationToken cancellationToken,
-        HubClientConnector __instance, ref Task<PersistentEndpointClient> __result)
+                       HubClientConnector __instance, ref Task<PersistentEndpointClient> __result)
     {
-        if (!GlobalConfigManager.Patched)
+        if (!GlobalConfigManager.Patched || GlobalConfigManager.Config.NonG0V0Server)
         {
             return true;
         }

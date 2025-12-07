@@ -20,6 +20,7 @@ public class AuthlibRulesetConfigManager(SettingsStore store, RulesetInfo rulese
         SetDefault(AuthlibRulesetSettings.MetadataUrl, string.Empty);
         SetDefault(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl, string.Empty);
         SetDefault(AuthlibRulesetSettings.DisableSentryLogger, true);
+        SetDefault(AuthlibRulesetSettings.NonG0V0Server, false);
     }
 }
 
@@ -34,4 +35,5 @@ public enum AuthlibRulesetSettings
     MetadataUrl,
     BeatmapSubmissionServiceUrl,
     DisableSentryLogger,
+    NonG0V0Server,
 }
