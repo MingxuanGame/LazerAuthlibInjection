@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore
+          dotnet tool restore
+        working-directory: osu.Game.Rulesets.AuthlibInjection
+
+      - name: Build project
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+        working-directory: osu.Game.Rulesets.AuthlibInjection
+
+      - name: Prepare release files
+        run: |
+          mkdir -p ../release-files
+          cp bin/Release/osu.Game.Rulesets.AuthlibInjection.dll ../release-files/
+        working-directory: osu.Game.Rulesets.AuthlibInjection
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: |
+            release-files/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
