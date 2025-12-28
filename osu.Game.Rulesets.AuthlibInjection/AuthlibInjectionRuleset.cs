@@ -8,9 +8,11 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Overlays;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Beatmaps;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
+using osu.Game.Rulesets.AuthlibInjection.Notifications;
 using osu.Game.Rulesets.AuthlibInjection.Patches;
 using osu.Game.Rulesets.AuthlibInjection.UI;
 using osu.Game.Rulesets.Configuration;
@@ -24,6 +26,8 @@ namespace osu.Game.Rulesets.AuthlibInjection
     public partial class AuthlibInjectionRuleset : Ruleset
     {
         private const string short_name = "authlibinjectionruleset";
+
+        private static bool currentServerNotificationPosted;
 
         public AuthlibInjectionRuleset()
         {
@@ -86,10 +90,15 @@ namespace osu.Game.Rulesets.AuthlibInjection
             }
 
             [BackgroundDependencyLoader]
-            private void load(OsuGame game)
+            private void load(OsuGame game, INotificationOverlay notifications)
             {
                 if (GlobalConfigManager.Config.DisableSentryLogger)
                     DisableSentryPatch.Run(game);
+
+                if (currentServerNotificationPosted) return;
+
+                notifications.Post(new CurrentServerNotification());
+                currentServerNotificationPosted = true;
             }
         }
     }

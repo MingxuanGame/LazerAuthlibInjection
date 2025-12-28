@@ -2,15 +2,13 @@ using System.IO;
 using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
-using osu.Game.Graphics;
 using osu.Game.Overlays;
-using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
 using osu.Game.Rulesets.AuthlibInjection.Extensions;
+using osu.Game.Rulesets.AuthlibInjection.Notifications;
 using osu.Game.Rulesets.AuthlibInjection.Patches;
 
 namespace osu.Game.Rulesets.AuthlibInjection.UI;
@@ -167,20 +165,5 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
             JsonConvert.SerializeObject(authlibRulesetConfig)
         );
         Notifications.Post(new ApiChangedNotification());
-    }
-
-    private partial class ApiChangedNotification : SimpleNotification
-    {
-        public ApiChangedNotification()
-        {
-            Text = "API settings changed, please restart the game to apply changes.";
-        }
-
-        [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
-        {
-            Icon = FontAwesome.Solid.Server;
-            IconContent.Colour = colours.BlueDark;
-        }
     }
 }
