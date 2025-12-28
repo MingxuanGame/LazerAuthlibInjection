@@ -1,19 +1,16 @@
-using System;
 using System.IO;
-using System.Reflection;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
-using osu.Framework.Threading;
 using osu.Game.Graphics;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
+using osu.Game.Rulesets.AuthlibInjection.Extensions;
 using osu.Game.Rulesets.AuthlibInjection.Patches;
 
 namespace osu.Game.Rulesets.AuthlibInjection.UI;
@@ -27,6 +24,7 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
     // Considered for distinction, batch disabling
     // ReSharper disable InconsistentNaming
     private SettingsCheckbox DisableSentryLogging = null!;
+    private SettingsCheckbox NonG0V0Server = null!;
 
     private SettingsTextBox ApiUrl = null!;
 
@@ -46,9 +44,6 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
     // ReSharper restore InconsistentNaming
 
     private string filePath = "";
-    private int isInitialLoading;
-
-    [CanBeNull] private ScheduledDelegate writeToFile;
 
     private AuthlibRulesetConfigManager config => (AuthlibRulesetConfigManager)Config;
 
@@ -56,13 +51,14 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 
     // [CanBeNull] [Resolved] private OsuGame game { get; set; }
 
-    [Resolved] protected INotificationOverlay Notifications { get; private set; } = null!;
-
+    [Resolved]
+    protected INotificationOverlay Notifications { get; private set; } = null!;
 
     [BackgroundDependencyLoader]
     private void load(OsuGame game, Storage storage)
     {
         filePath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
+
         if (File.Exists(filePath))
         {
             string json = File.ReadAllText(filePath);
@@ -117,25 +113,19 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
                 LabelText = "Disable Sentry Logger",
                 TooltipText = "Stop sending telemetry error data to the osu! dev team.",
                 Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger)
-            }
+            },
+            NonG0V0Server = new SettingsCheckbox()
+            {
+                LabelText = "Is non-g0v0-server",
+                TooltipText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
+                Current = config.GetBindable<bool>(AuthlibRulesetSettings.NonG0V0Server),
+            },
+            new SettingsButton()
+            {
+                Text = "Save Changes",
+                Action = onSaveChanges
+            },
         ];
-        isInitialLoading = Children.Count;
-        ApiUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(ApiUrl, nameof(ApiUrl), e), true);
-        WebsiteUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(WebsiteUrl, nameof(WebsiteUrl), e), true);
-        ClientId.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(ClientId, nameof(ClientId), e), true);
-        ClientSecret.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(ClientSecret, nameof(ClientSecret), e), true);
-        SpectatorUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(SpectatorUrl, nameof(SpectatorUrl), e), true);
-        MultiplayerUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(MultiplayerUrl, nameof(MultiplayerUrl), e), true);
-        MetadataUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(MetadataUrl, nameof(MetadataUrl), e), true);
-        BeatmapSubmissionServiceUrl.Current.BindValueChanged(e =>
-            onCustomApiUrlChanged(BeatmapSubmissionServiceUrl, nameof(BeatmapSubmissionServiceUrl), e), true);
         DisableSentryLogging.Current.BindValueChanged(e => onSentryOptOutChanged(e, game), true);
     }
 
@@ -150,42 +140,33 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
         }
     }
 
-    private void onCustomApiUrlChanged(SettingsTextBox input, string from, ValueChangedEvent<string> e)
+    private void onSaveChanges()
     {
-        if (isInitialLoading > 0)
+        foreach (var settingsTextBox in (SettingsTextBox[])[ApiUrl, WebsiteUrl, SpectatorUrl, MultiplayerUrl, MetadataUrl, BeatmapSubmissionServiceUrl])
         {
-            --isInitialLoading;
+            if (!string.IsNullOrEmpty(settingsTextBox.Current.Value))
+                settingsTextBox.Current.Value = settingsTextBox.Current.Value.RemoveSuffix("/").AddHttpsProtocol();
         }
 
-        PropertyInfo props = authlibRulesetConfig.GetType().GetProperty(from);
-        if (props != null)
+        authlibRulesetConfig = new AuthlibRulesetConfig()
         {
-            string value = (string)props.GetValue(authlibRulesetConfig);
-            if (string.Equals(value, e.NewValue, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
+            ApiUrl = ApiUrl.Current.Value,
+            WebsiteUrl = WebsiteUrl.Current.Value,
+            ClientId = ClientId.Current.Value,
+            ClientSecret = ClientSecret.Current.Value,
+            SpectatorUrl = SpectatorUrl.Current.Value,
+            MultiplayerUrl = MultiplayerUrl.Current.Value,
+            MetadataUrl = MetadataUrl.Current.Value,
+            BeatmapSubmissionServiceUrl = BeatmapSubmissionServiceUrl.Current.Value,
+            DisableSentryLogger = DisableSentryLogging.Current.Value,
+            NonG0V0Server = NonG0V0Server.Current.Value,
+        };
 
-            props.SetValue(authlibRulesetConfig, e.NewValue);
-        }
-
-        writeToFile?.Cancel();
-        writeToFile = Scheduler.AddDelayed(() =>
-        {
-            bool removedSuffix = false;
-            if (from.EndsWith("Url") && e.NewValue.EndsWith("/"))
-            {
-                input.Current.Value = e.NewValue.TrimEnd('/');
-                removedSuffix = true;
-            }
-
-            File.WriteAllText(
-                filePath,
-                JsonConvert.SerializeObject(authlibRulesetConfig)
-            );
-            if (!removedSuffix)
-                Notifications.Post(new ApiChangedNotification());
-        }, delay);
+        File.WriteAllText(
+            filePath,
+            JsonConvert.SerializeObject(authlibRulesetConfig)
+        );
+        Notifications.Post(new ApiChangedNotification());
     }
 
     private partial class ApiChangedNotification : SimpleNotification
