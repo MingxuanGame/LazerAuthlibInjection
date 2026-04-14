@@ -2,14 +2,18 @@ using System.IO;
 using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.AuthlibInjection.Configuration;
 using osu.Game.Rulesets.AuthlibInjection.Extensions;
 using osu.Game.Rulesets.AuthlibInjection.Notifications;
 using osu.Game.Rulesets.AuthlibInjection.Patches;
+using osuTK;
 
 namespace osu.Game.Rulesets.AuthlibInjection.UI;
 
@@ -17,31 +21,27 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 {
     private const int delay = 1500;
     private readonly Ruleset ruleset = ruleset;
-    private AuthlibRulesetConfig authlibRulesetConfig = new();
+    private AuthlibRulesetConfig authlibRulesetConfig = new AuthlibRulesetConfig();
 
-    // Considered for distinction, batch disabling
-    // ReSharper disable InconsistentNaming
-    private SettingsCheckbox DisableSentryLogging = null!;
-    private SettingsCheckbox NonG0V0Server = null!;
+    private FormCheckBox disableSentryLogging = null!;
+    private FormCheckBox nonG0V0Server = null!;
 
-    private SettingsTextBox ApiUrl = null!;
+    private FormTextBox apiUrl = null!;
+    private FormTextBox beatmapSubmissionServiceUrl = null!;
 
-    private SettingsTextBox BeatmapSubmissionServiceUrl = null!;
+    private FormTextBox clientId = null!;
+    private FormTextBox clientSecret = null!;
 
-    private SettingsTextBox ClientId = null!;
+    private FormTextBox metadataUrl = null!;
+    private FormTextBox multiplayerUrl = null!;
+    private FormTextBox spectatorUrl = null!;
+    private FormTextBox websiteUrl = null!;
 
-    private SettingsTextBox ClientSecret = null!;
-
-    private SettingsTextBox MetadataUrl = null!;
-
-    private SettingsTextBox MultiplayerUrl = null!;
-
-    private SettingsTextBox SpectatorUrl = null!;
-
-    private SettingsTextBox WebsiteUrl = null!;
-    // ReSharper restore InconsistentNaming
+    private FillFlowContainer advancedSettingsFlow = null!;
 
     private string filePath = "";
+
+    private readonly BindableBool showAdvancedSettings = new BindableBool();
 
     private AuthlibRulesetConfigManager config => (AuthlibRulesetConfigManager)Config;
 
@@ -55,6 +55,10 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
     [BackgroundDependencyLoader]
     private void load(OsuGame game, Storage storage)
     {
+        // Added for smooth transition of advanced settings section
+        AutoSizeDuration = 300;
+        AutoSizeEasing = Easing.OutQuint;
+
         filePath = storage.GetFullPath(AuthlibRulesetConfig.CONFIG_FILE_NAME);
 
         if (File.Exists(filePath))
@@ -66,65 +70,83 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 
         Children =
         [
-            ApiUrl = new SettingsTextBox()
+            new SettingsItemV2(apiUrl = new FormTextBox
             {
-                LabelText = "API Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.ApiUrl)
+                Caption = "API Url",
+                Current = config.GetBindable<string>(AuthlibRulesetSettings.ApiUrl),
+            }),
+            new SettingsItemV2(websiteUrl = new FormTextBox
+            {
+                Caption = "Website Url",
+                Current = config.GetBindable<string>(AuthlibRulesetSettings.WebsiteUrl),
+            }),
+            new SettingsItemV2(new FormCheckBox
+            {
+                Caption = "Show Advanced",
+                Current = showAdvancedSettings,
+            }),
+            advancedSettingsFlow = new FillFlowContainer
+            {
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(5),
+                Alpha = 0,
+                Children =
+                [
+                    new SettingsItemV2(clientId = new FormTextBox
+                    {
+                        Caption = "Client ID",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.ClientId),
+                    }),
+                    new SettingsItemV2(clientSecret = new FormTextBox
+                    {
+                        Caption = "Client Secret",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.ClientSecret),
+                    }),
+                    new SettingsItemV2(spectatorUrl = new FormTextBox
+                    {
+                        Caption = "Spectator Url",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.SpectatorUrl),
+                    }),
+                    new SettingsItemV2(multiplayerUrl = new FormTextBox
+                    {
+                        Caption = "Multiplayer Url",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.MultiplayerUrl)
+                    }),
+                    new SettingsItemV2(metadataUrl = new FormTextBox
+                    {
+                        Caption = "Metadata Url",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.MetadataUrl),
+                    }),
+                    new SettingsItemV2(beatmapSubmissionServiceUrl = new FormTextBox
+                    {
+                        Caption = "Beatmap Submission Service Url",
+                        Current = config.GetBindable<string>(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl),
+                    }),
+                ],
             },
-            WebsiteUrl = new SettingsTextBox()
+            new SettingsItemV2(disableSentryLogging = new FormCheckBox
             {
-                LabelText = "Website Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.WebsiteUrl)
-            },
-            ClientId = new SettingsTextBox()
+                Caption = "Disable Sentry Logger",
+                HintText = "Stop sending telemetry error data to the osu! dev team.",
+                Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger),
+            }),
+            new SettingsItemV2(nonG0V0Server = new FormCheckBox
             {
-                LabelText = "Client ID",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.ClientId)
-            },
-            ClientSecret = new SettingsTextBox()
-            {
-                LabelText = "Client Secret",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.ClientSecret)
-            },
-            SpectatorUrl = new SettingsTextBox()
-            {
-                LabelText = "Spectator Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.SpectatorUrl)
-            },
-            MultiplayerUrl = new SettingsTextBox()
-            {
-                LabelText = "Multiplayer Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.MultiplayerUrl)
-            },
-            MetadataUrl = new SettingsTextBox()
-            {
-                LabelText = "Metadata Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.MetadataUrl)
-            },
-            BeatmapSubmissionServiceUrl = new SettingsTextBox()
-            {
-                LabelText = "Beatmap Submission Service Url",
-                Current = config.GetBindable<string>(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl)
-            },
-            DisableSentryLogging = new SettingsCheckbox()
-            {
-                LabelText = "Disable Sentry Logger",
-                TooltipText = "Stop sending telemetry error data to the osu! dev team.",
-                Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger)
-            },
-            NonG0V0Server = new SettingsCheckbox()
-            {
-                LabelText = "Is non-g0v0-server",
-                TooltipText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
+                Caption = "Is non-g0v0-server",
+                HintText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
                 Current = config.GetBindable<bool>(AuthlibRulesetSettings.NonG0V0Server),
-            },
-            new SettingsButton()
+            }),
+            new SettingsButton
             {
                 Text = "Save Changes",
-                Action = onSaveChanges
+                Action = onSaveChanges,
             },
         ];
-        DisableSentryLogging.Current.BindValueChanged(e => onSentryOptOutChanged(e, game), true);
+
+        showAdvancedSettings.BindValueChanged(e => advancedSettingsFlow.FadeTo(e.NewValue ? 1 : 0, 300, Easing.OutQuint));
+        disableSentryLogging.Current.BindValueChanged(e => onSentryOptOutChanged(e, game), true);
     }
 
     private void onSentryOptOutChanged(ValueChangedEvent<bool> e, OsuGame game)
@@ -140,24 +162,24 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
 
     private void onSaveChanges()
     {
-        foreach (var settingsTextBox in (SettingsTextBox[])[ApiUrl, WebsiteUrl, SpectatorUrl, MultiplayerUrl, MetadataUrl, BeatmapSubmissionServiceUrl])
+        foreach (var textBox in (FormTextBox[])[apiUrl, websiteUrl, spectatorUrl, multiplayerUrl, metadataUrl, beatmapSubmissionServiceUrl])
         {
-            if (!string.IsNullOrEmpty(settingsTextBox.Current.Value))
-                settingsTextBox.Current.Value = settingsTextBox.Current.Value.RemoveSuffix("/").AddHttpsProtocol();
+            if (!string.IsNullOrEmpty(textBox.Current.Value))
+                textBox.Current.Value = textBox.Current.Value.RemoveSuffix("/").AddHttpsProtocol();
         }
 
-        authlibRulesetConfig = new AuthlibRulesetConfig()
+        authlibRulesetConfig = new AuthlibRulesetConfig
         {
-            ApiUrl = ApiUrl.Current.Value,
-            WebsiteUrl = WebsiteUrl.Current.Value,
-            ClientId = ClientId.Current.Value,
-            ClientSecret = ClientSecret.Current.Value,
-            SpectatorUrl = SpectatorUrl.Current.Value,
-            MultiplayerUrl = MultiplayerUrl.Current.Value,
-            MetadataUrl = MetadataUrl.Current.Value,
-            BeatmapSubmissionServiceUrl = BeatmapSubmissionServiceUrl.Current.Value,
-            DisableSentryLogger = DisableSentryLogging.Current.Value,
-            NonG0V0Server = NonG0V0Server.Current.Value,
+            ApiUrl = apiUrl.Current.Value,
+            WebsiteUrl = websiteUrl.Current.Value,
+            ClientId = clientId.Current.Value,
+            ClientSecret = clientSecret.Current.Value,
+            SpectatorUrl = spectatorUrl.Current.Value,
+            MultiplayerUrl = multiplayerUrl.Current.Value,
+            MetadataUrl = metadataUrl.Current.Value,
+            BeatmapSubmissionServiceUrl = beatmapSubmissionServiceUrl.Current.Value,
+            DisableSentryLogger = disableSentryLogging.Current.Value,
+            NonG0V0Server = nonG0V0Server.Current.Value,
         };
 
         File.WriteAllText(
