@@ -42,6 +42,7 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
     private string filePath = "";
 
     private readonly BindableBool showAdvancedSettings = new BindableBool();
+    private readonly Bindable<SettingsNote.Data> advancedSettingsWarning = new Bindable<SettingsNote.Data>();
 
     private AuthlibRulesetConfigManager config => (AuthlibRulesetConfigManager)Config;
 
@@ -84,7 +85,13 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
             {
                 Caption = "Show Advanced",
                 Current = showAdvancedSettings,
-            }),
+            })
+            {
+                Note =
+                {
+                    BindTarget = advancedSettingsWarning,
+                },
+            },
             advancedSettingsFlow = new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
@@ -124,20 +131,20 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
                         Caption = "Beatmap Submission Service Url",
                         Current = config.GetBindable<string>(AuthlibRulesetSettings.BeatmapSubmissionServiceUrl),
                     }),
+                    new SettingsItemV2(nonG0V0Server = new FormCheckBox
+                    {
+                        Caption = "Is non-g0v0-server",
+                        HintText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
+                        Current = config.GetBindable<bool>(AuthlibRulesetSettings.NonG0V0Server),
+                    }),
+                    new SettingsItemV2(disableSentryLogging = new FormCheckBox
+                    {
+                        Caption = "Disable Sentry Logger",
+                        HintText = "Stop sending telemetry error data to the osu! dev team.",
+                        Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger),
+                    }),
                 ],
             },
-            new SettingsItemV2(disableSentryLogging = new FormCheckBox
-            {
-                Caption = "Disable Sentry Logger",
-                HintText = "Stop sending telemetry error data to the osu! dev team.",
-                Current = config.GetBindable<bool>(AuthlibRulesetSettings.DisableSentryLogger),
-            }),
-            new SettingsItemV2(nonG0V0Server = new FormCheckBox
-            {
-                Caption = "Is non-g0v0-server",
-                HintText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
-                Current = config.GetBindable<bool>(AuthlibRulesetSettings.NonG0V0Server),
-            }),
             new SettingsButtonV2
             {
                 Text = "Save Changes",
@@ -145,8 +152,14 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
             },
         ];
 
-        showAdvancedSettings.BindValueChanged(e => advancedSettingsFlow.FadeTo(e.NewValue ? 1 : 0, 300, Easing.OutQuint));
+        showAdvancedSettings.BindValueChanged(onAdvancedVisibilityChanged);
         disableSentryLogging.Current.BindValueChanged(e => onSentryOptOutChanged(e, game), true);
+    }
+
+    private void onAdvancedVisibilityChanged(ValueChangedEvent<bool> e)
+    {
+        advancedSettingsFlow.FadeTo(e.NewValue ? 1 : 0, 300, Easing.OutQuint);
+        advancedSettingsWarning.Value = e.NewValue ? new SettingsNote.Data("These settings are not intended for normal gameplay. Use with caution!", SettingsNote.Type.Warning) : null;
     }
 
     private void onSentryOptOutChanged(ValueChangedEvent<bool> e, OsuGame game)
