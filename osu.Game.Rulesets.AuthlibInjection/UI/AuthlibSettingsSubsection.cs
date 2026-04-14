@@ -138,7 +138,7 @@ public partial class AuthlibSettingsSubsection(Ruleset ruleset) : RulesetSetting
                 HintText = "Whether the server is a GooGuTeam/g0v0-server instance. You can view https://<api-url>/docs to identify",
                 Current = config.GetBindable<bool>(AuthlibRulesetSettings.NonG0V0Server),
             }),
-            new SettingsButton
+            new SettingsButtonV2
             {
                 Text = "Save Changes",
                 Action = onSaveChanges,
