@@ -32,19 +32,19 @@ jobs:
         run: |
           dotnet restore
           dotnet tool restore
-        working-directory: osu.Game.Rulesets.AuthlibInjection
+        working-directory: osu.Game.Rulesets.EnhancedAuth
 
       - name: Build project
         run: |
           chmod +x ./build.sh
           ./build.sh
-        working-directory: osu.Game.Rulesets.AuthlibInjection
+        working-directory: osu.Game.Rulesets.EnhancedAuth
 
       - name: Prepare release files
         run: |
           mkdir -p ../release-files
-          cp bin/Release/osu.Game.Rulesets.AuthlibInjection.dll ../release-files/
-        working-directory: osu.Game.Rulesets.AuthlibInjection
+          cp bin/Release/osu.Game.Rulesets.EnhancedAuth.dll ../release-files/
+        working-directory: osu.Game.Rulesets.EnhancedAuth
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

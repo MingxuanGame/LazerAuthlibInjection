@@ -37,7 +37,7 @@ Default locations:
 2. Install AuthlibInjection
 
 Download the latest release from the [Releases](https://github.com/MingxuanGame/LazerAuthlibInjection/releases) and copy
-`osu.Game.Rulesets.AuthlibInjection.dll` into the `rulesets` directory.
+`osu.Game.Rulesets.EnhancedAuth.dll` into the `rulesets` directory.
 
 3. Configure AuthlibInjection
 
