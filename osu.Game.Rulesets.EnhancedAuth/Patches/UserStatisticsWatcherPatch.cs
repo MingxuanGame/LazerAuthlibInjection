@@ -9,6 +9,7 @@ using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.EnhancedAuth.Configuration;
 using osu.Game.Rulesets.EnhancedAuth.Extensions;
+using osu.Game.Scoring;
 
 namespace osu.Game.Rulesets.EnhancedAuth.Patches;
 
