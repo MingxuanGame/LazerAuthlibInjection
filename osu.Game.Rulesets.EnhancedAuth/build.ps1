@@ -18,7 +18,7 @@ try
 
     Write-Output "Running ILRepack..."
     # Change the path if needed 
-    $HarmonyPath = "$HOME/.nuget/packages/lib.harmony/2.4.1/lib/net8.0/0Harmony.dll"
+    $HarmonyPath = "$HOME/.nuget/packages/lib.harmony/2.4.2/lib/net10.0/0Harmony.dll"
 
     dotnet tool run ilrepack -out:$output `
     $source `
