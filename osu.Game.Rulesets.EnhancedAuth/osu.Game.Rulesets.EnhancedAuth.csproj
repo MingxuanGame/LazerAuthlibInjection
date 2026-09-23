@@ -11,6 +11,6 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Lib.Harmony" Version="2.4.2" />
-        <PackageReference Include="ppy.osu.Game" Version="2026.730.0" />
+        <PackageReference Include="ppy.osu.Game" Version="2026.916.0" />
     </ItemGroup>
 </Project>

@@ -4,7 +4,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
@@ -20,7 +19,6 @@ namespace osu.Game.Rulesets.EnhancedAuth.UI;
 public partial class EnhancedSettingsSubsection(Ruleset ruleset) : RulesetSettingsSubsection(ruleset)
 {
     private const int delay = 1500;
-    private readonly Ruleset ruleset = ruleset;
     private EnhancedRulesetConfig authlibRulesetConfig = new EnhancedRulesetConfig();
 
     private FormCheckBox disableSentryLogging = null!;
@@ -45,8 +43,6 @@ public partial class EnhancedSettingsSubsection(Ruleset ruleset) : RulesetSettin
     private readonly Bindable<SettingsNote.Data> advancedSettingsWarning = new Bindable<SettingsNote.Data>();
 
     private EnhancedRulesetConfigManager config => (EnhancedRulesetConfigManager)Config;
-
-    protected override LocalisableString Header => ruleset.Description;
 
     // [CanBeNull] [Resolved] private OsuGame game { get; set; }
 
